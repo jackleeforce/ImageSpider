@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import json
 from multiprocessing.pool import Pool
 
 from selenium import webdriver
@@ -7,7 +7,7 @@ from selenium import webdriver
 from func import *
 
 
-def get_baidu_image_links(main_keyword, second_keyword, link_files_dir):
+def get_google_image_links(main_keyword, second_keyword, link_files_dir):
     link_file = link_files_dir + second_keyword
 
     if not os.path.exists(link_files_dir):
@@ -17,19 +17,25 @@ def get_baidu_image_links(main_keyword, second_keyword, link_files_dir):
 
     driver = webdriver.Chrome()
 
-    keyword = main_keyword + '+' + second_keyword
+    keyword = main_keyword + ' ' + second_keyword
 
-    url = "https://image.baidu.com/search/index?tn=baiduimage&word=" + keyword
+    url = url = "https://www.google.com/search?q=" + keyword + "&source=lnms&tbm=isch"
     driver.get(url)
 
     for i in range(20):
         driver.execute_script("window.scrollBy(0, 1000000)")
         time.sleep(1)
 
-    imges = driver.find_elements_by_xpath('//div[@id="imgContainer"]//li[@class="imgitem"]')
+        try:
+            driver.find_element_by_xpath('//*[@id=“smb”]').click()
+        except Exception as e:
+            print("%s already get list all image" % (second_keyword))
+            break;
+
+    imges = driver.find_elements_by_xpath('//div[contains(@class,"rg_meta")]')
 
     for image in imges:
-        image_url = image.get_attribute('data-objurl')
+        image_url = json.loads(image.get_attribute('innerHTML'))["ou"]
         image_urls.add(image_url)
 
     driver.quit()
@@ -49,9 +55,9 @@ if __name__ == "__main__":
     second_keywords = ['蝶泳', '自由泳', '仰泳', '蛙泳']
     # second_keywords = ['butterfly']
 
-    download_dir = './image/baidu/' + main_keyword + '/'
+    download_dir = './image/google/' + main_keyword + '/'
 
-    link_files_dir = './linkfile/baidu/' + main_keyword + '/'
+    link_files_dir = './linkfile/google/' + main_keyword + '/'
 
     log_dir = './logs/'
 
@@ -68,7 +74,7 @@ if __name__ == "__main__":
 
     p = Pool()
     for i in range(len(second_keywords)):
-        p.apply_async(get_baidu_image_links,
+        p.apply_async(get_google_image_links,
                       args=(main_keyword, second_keywords[i], link_files_dir))
     p.close()
     p.join()

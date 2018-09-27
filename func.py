@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import ssl
 import time
@@ -40,9 +42,9 @@ def download_images(link_file_path, download_dir, log_dir):
                     wf.write(data)
 
                 count += 1
-                if count % 10 == 0:
-                    print('Process-{0} is sleeping'.format(second_keyword))
-                    time.sleep(5)
+                # if count % 10 == 0:
+                #     print('Process-{0} is sleeping'.format(second_keyword))
+                #     time.sleep(5)
 
             except urllib.error.URLError as e:
                 print('URLError:'+link)
